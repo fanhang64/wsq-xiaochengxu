@@ -12,7 +12,7 @@ Page({
     color: kawa.Theme.MainColor,
     user: {
       avatar: '',
-      nickname: '小虾米',
+      nickname: '',
       summary: '啦啦啦 我是卖报的小行家',
     }, 
     copyright: "",

@@ -164,3 +164,7 @@
   -webkit-line-clamp: 3;
   -webkit-box-orient: vertical;
 }
+
+.location{
+  margin-top:10rpx;
+}

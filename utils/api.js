@@ -189,7 +189,7 @@ function updateUser(data) {
 }
 
 // return self user-info
-function self() {
+function getUser() {
   return req({
     url: `${Host}/users/`,
     method: 'GET'
@@ -217,18 +217,16 @@ function getUserFavorList(uid, since, limit) {
   })
 }
 
-
 // get post list, fitler: top,val,adz, topic
-function getPostList(since, limit, filter, topic) {
-  if (!topic) {
+function getPostList(sinceId, limit, filter, topic_id) {
+  if (!topic_id) {
     return req({
-      url: `${Host}/post/?since_id=${since}&limit=${limit}&filter=${filter}`,
+      url: `${Host}/post/?since_id=${sinceId}&limit=${limit}&filter=${filter}`,
       method: 'GET'
     })
   } else {
-    var encoded = encodeURIComponent(topic)
     return req({
-      url: `${Host}/post/tags/${encoded}/posts?since_id=${since}&limit=${limit}`,
+      url: `${Host}/post/?since_id=${sinceId}&limit=${limit}&topic_id=${topic_id}`,
       method: 'GET'
     })
   }
@@ -357,8 +355,8 @@ function deleteCommentFavor(cid) {
   })
 }
 
-// tags
-function getPostByTag(tag) {
+// topic
+function getPostByTopic(topic_id) {
   var encoded = encodeURIComponent(tag)
   return req({
     url: `${Host}/api/tags/${encoded}/posts`,
@@ -366,14 +364,14 @@ function getPostByTag(tag) {
   })
 }
 
-function getTagList() {
+function getTopicList() {
   return req({
-    url: `${Host}/api/tags`,
+    url: `${Host}/post/topic/`,
     method: 'GET'
   })
 }
 
-function linkTagPost(data) {
+function linkTopicPost(data) {
   return req({
     url: `${Host}/api/tags/posts`,
     method: 'POST',
@@ -431,7 +429,7 @@ function decrypt(data) {
 module.exports = {
   autoAuth: autoAuth,
   updateUser: updateUser,
-  getSelf: self,
+  getUser: getUser,
   getUserPostList: getUserPostList,
   getUserCommentList: getUserCommentList,
   getUserFavorList: getUserFavorList,
@@ -466,9 +464,9 @@ module.exports = {
   deleteCommentFavor: deleteCommentFavor,
 
   // tags
-  getPostByTag: getPostByTag,
-  getTagList: getTagList,
-  linkTagPost: linkTagPost,
+  getPostByTopic: getPostByTopic,
+  getTopicList: getTopicList,
+  linkTopicPost: linkTopicPost,
 
   // messages
   getMessageList: getMessageList,

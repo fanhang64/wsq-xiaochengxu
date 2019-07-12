@@ -167,3 +167,7 @@
   font-size: 32rpx;
   text-align: center;
 }
+
+.location {
+  margin-top:10rpx;
+}

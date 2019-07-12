@@ -29,23 +29,8 @@ Page({
       title: "公告标题title",
       link: "公告链接",
     },
-    tops: [
-      {'title': '标题1'}, {'title': '标题2'},
-      {'title': '标题3'}, {'title': '标题4'}
-    ],
-    posts: [
-      {
-        'author': {'avatar': '', 'nickname': 'nickname123'},
-        'agoTime': '2019-01-05',
-        'styled': [{'tag': '123'}, {'tag': '', 'text': '内容1111111'}],
-        'images': ['https://res.wx.qq.com/wxdoc/dist/assets/img/8Font.color.03f7bed7.png']
-      }, {
-        'author': {'avatar': '', 'nickname': '昵称啊'},
-        'agoTime': '2019-05-05',
-        'styled': [{'tag': 'abc', 'text': '只是内容嗷嗷！'}, {'tag': '123', 'text': '内容12222'}],
-        'images': []
-      }, {}
-    ],
+    tops: [],
+    posts: [],
     loader: {
       ing: false, // 是否正在加载
       more: true, // 是否有更多数据
@@ -61,9 +46,9 @@ Page({
       users: "100"
     },
     tab: {
-      current: 0, //预设默认选中的栏目
-      scrollLeft: 0, //tab滚动条距离左侧距离
-      items: ["全部", "精华", "热门"],
+      current: 0, // 预设默认选中的栏目
+      scrollLeft: 0, // tab滚动条距离左侧距离
+      items: ['全部', '精华'],
     },
     topic: {
       items: [],
@@ -82,7 +67,7 @@ Page({
   onLoad: function (opt) {
     applyTheme(kawa.Theme)
     ctr.setup(this)
-    ctr.onLoad(opt)
+    ctr.onLoad(opt);
   },
   // 从其它页面返回数据
   onResult: function(data) {

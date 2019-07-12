@@ -14,20 +14,20 @@ const user = app.globalData.userInfo
     view.setData({ user: user })
     return 
   }
-  const meta = app.globalData.meta
-  if (meta && meta.app_copyright) {
-    view.setData({ copyright: meta.app_copyright })
-  }
-  if (meta && meta.user_mode) {
-    view.setData({
-      metadata: { user_mode: meta.user_mode }
-    })
-  }
-  if (meta && (meta.app_support === 'false')) {
-    view.setData({ support: false })
-  }
+  // const meta = app.globalData.meta
+  // if (meta && meta.app_copyright) {
+  //   view.setData({ copyright: meta.app_copyright })
+  // }
+  // if (meta && meta.user_mode) {
+  //   view.setData({
+  //     metadata: { user_mode: meta.user_mode }
+  //   })
+  // }
+  // if (meta && (meta.app_support === 'false')) {
+  //   view.setData({ support: false })
+  // }
   // update 
-  api.getSelf().then((resp) => {
+  api.getUser().then((resp) => {
     app.globalData.userInfo = resp.data
     view.setData({ user: resp.data })
     console.log("get user data:", resp.data)

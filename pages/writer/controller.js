@@ -9,6 +9,7 @@ function setup(v) {
 
 function onLoad(options) {
   var topic = app.globalData.topics
+  console.log("topic.....", topic);
   view.setData({ topic: { items: topic, selected: -1}})
 }
 
@@ -77,10 +78,13 @@ function onClickSubmit() {
   // }
 
   // 文本内容
+  var selected = view.data.topic.selected;
+
   var data = {
     title: view.data.title || "测试内容123",
     content: view.data.content,
-    author_id: 1  // 用户id
+    author_id: 1,  // 用户id
+    topic_id: view.data.topic.items[selected].id
   }
 
   // 地理位置
@@ -88,12 +92,12 @@ function onClickSubmit() {
     data.location = JSON.stringify(view.data.location)
   }
   // attach topic  关联话题
-  // var topic = view.data.topic
-  // var tag = undefined
-  // if (topic.selected >= 0 && topic.selected < topic.items.length) {
-  //   tag = topic.items[topic.selected].text
-  //   data.content = '#' + tag + '# ' + data.content
-  // }
+  var topic = view.data.topic
+  var tag = undefined
+  if (topic.selected >= 0 && topic.selected < topic.items.length) {
+    tag = topic.items[topic.selected].name
+    data.content = '#' + tag + '# ' + data.content
+  }
 
   // 上传图文
   var handler = undefined
@@ -110,10 +114,6 @@ function onClickSubmit() {
   handler.then((resp) => {
     wx.hideLoading()
     console.log(resp, "=====")
-    // 关联标签和文章
-    // if (tag) {
-    //   linkTagPost(tag, resp.data.id)
-    // }
 
     // refresh list
     util.setResult({
@@ -142,13 +142,13 @@ function onClickSubmit() {
   })
 }
 
-function linkTagPost(tag, pid) {
-  api.linkTagPost({tags:[tag], pid: pid}).then( resp => {
-    console.log("link success:" + resp.statusCode)
-  }).catch( err => {
-    console.log(err)
-  })
-}
+// function linkTagPost(tag, pid) {
+//   api.linkTagPost({tags:[tag], pid: pid}).then( resp => {
+//     console.log("link success:" + resp.statusCode)
+//   }).catch( err => {
+//     console.log(err)
+//   })
+// }
 
 function uploadText(data) {
   return api.createPost(data)

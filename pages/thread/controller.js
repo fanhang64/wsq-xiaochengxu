@@ -26,24 +26,13 @@ function onLoad(options) {
 }
 
 function fetch(options) {
-  function setup(item) {
-    var utc = item.post.created_at * 1000
-    item.post.agoTime = util.agoTime(utc)
-    if (!item.post.images && item.post.media) {
-      item.post.images = JSON.parse(item.post.media.path)
-    }
-    if (!item.post.styled) {
-      item.post.styled = util.decorateText(item.post.content)
-    }
-    if (item.post.location) {
-      try {
-        item.post.location = JSON.parse(item.post.location)
-      } catch(err){}
-    }
+  function setup(req_data) {
+    var date = new Date(req_data.post.created_at)
+    req_data.post.created_at = util.formatTime(date);
 
     // set post data
     view.setData({
-      item: item
+      item: req_data
     })
 
     // request comments === 评论
@@ -57,10 +46,10 @@ function fetch(options) {
     // })
   }
 
-  var item = util.getRequest("post")
-  console.log("那大的帖子数据", "=======", item)
-  if (item) {
-    setup(item)
+  var req_data = util.getRequest("post")
+  console.log("那大的帖子数据", "=======", req_data)
+  if (req_data) {
+    setup(req_data)
     return
   }
   var pid = options.pid

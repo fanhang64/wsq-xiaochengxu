@@ -2,16 +2,16 @@
 <view class='card' style='margin: 18rpx 0 18rpx 0;'>
   <view class='horizontal'>
     <image class='avatar' 
-      src="{{user.avatar?user.avatar: theme+'/user_icon.png'}}">
+      src="{{user.avatarUrl?user.avatarUrl: theme+'/user_icon.png'}}">
     </image>
     <view style='margin-left:18rpx;'>
-      <view class='title' style='font-size:30rpx;' >{{user.nickname?user.nickname:'路人'}}</view>
-      <button wx:if="{{user.nickname && metadata.user_mode}}"
+      <view class='title' style='font-size:30rpx;' >{{user.nickName?user.nickName:'路人'}}</view>
+      <button wx:if="{{user.nickName && metadata.user_mode}}"
         open-type="getPhoneNumber"
         bindgetphonenumber="getPhoneNumber"
         class='btn-clear subtitle'>{{user.phone? user.phone: '绑定手机号'}}</button>
     </view>
-    <view hidden='{{user.nickname}}' style='margin-left:auto;'>
+    <view hidden='{{user.nickName}}' style='margin-left:auto;'>
       <button wx:if="{{metadata.user_mode < 2}}"
       class='btn' 
       hover-class='btn-hover'

@@ -8,10 +8,10 @@ var view = undefined
 var tabData = []
 
 // Home Controller 
-function setup(_view) {
+function setup(_view, opt) {
   view = _view
-  
-  var i = 0, n = view.data.tab.items.length
+
+  var i = 0, n = view.data.tab.items.length;
   for (; i < n; i++) {
     tabData.push({ loader: {
       ing: view.data.loader.ing,
@@ -25,7 +25,7 @@ function setup(_view) {
 
 function bindTabData(idx) {
   console.log('bindTabData:', idx, tabData[idx])
-  var data = tabData[idx]
+  var data = tabData[idx];
   view.setData({posts: data.posts})
   view.setData({loader: data.loader})
 }
@@ -73,21 +73,21 @@ function onLoad(opt) {
   })
   // 进入第一次加载
   refreshList(view.data.tab.current)
-  return;
+
   // 用户信息
-  try {
-    const value = wx.getStorageSync('user')
-    if (value) {
-      app.globalData.userInfo = value
-    }
-  } catch (e) {
-    // Do something when catch error
-  }
-  api.getSelf().then((resp) => {
-    app.globalData.userInfo = resp.data
-    // refresh local storage
-    wx.setStorage({ key: 'user', data: resp.data })
-  })
+  // try {
+  //   const value = wx.getStorageSync('user')
+  //   if (value) {
+  //     app.globalData.userInfo = value
+  //   }
+  // } catch (e) {
+  //   // Do something when catch error
+  // }
+  // api.getUser().then((resp) => {
+  //   app.globalData.userInfo = resp.data
+  //   // refresh local storage
+  //   wx.setStorage({ key: 'user', data: resp.data })
+  // })
 
   // 话题列表
   try {
@@ -96,11 +96,12 @@ function onLoad(opt) {
     }})
   } catch(e){}
 
-  api.getTagList().then( resp => {
-    app.globalData.topics = resp.data
-    showTopic(resp.data)
+  api.getTopicList().then( resp => {
+    var res_data = resp.data
+    app.globalData.topics = res_data.data
+    showTopic(res_data.data)
     // refresh local storage
-    wx.setStorage({ key: 'topic', data: resp.data })
+    wx.setStorage({ key: 'topic', data: res_data.data })
   })
 }
 
@@ -110,14 +111,14 @@ function showTopic(items) {
     return
   }
   var topics = items.slice(0)
-  topics.unshift({text: "全部话题"})
+  topics.unshift({name: "全部话题"})
   view.setData({ topic: { items: topics, selected: -1}})
 }
 
 function getSelectedTopic() {
   var topic = view.data.topic
   if (topic.selected > 0 && topic.selected < topic.items.length) {
-    return topic.items[topic.selected].text
+    return topic.items[topic.selected].id
   }
 }
 
@@ -156,8 +157,9 @@ function onTabChanged(idx) {
   refreshList(idx)
 }
 
-function refreshList(tabIndex, topic) {
+function refreshList(tabIndex, topic_id) {
   var data = tabData[tabIndex]
+  console.log(data, "data,,=====");
   if (data.loader.ing) {
     return
   }
@@ -171,13 +173,14 @@ function refreshList(tabIndex, topic) {
   data.posts = []
   bindTabData(tabIndex)
   console.log("load data for tab:" + tabIndex, "filter:" + fitler)
-  api.getPostList(0, limit, fitler, topic).then(resp => {
+  api.getPostList(0, limit, fitler, topic_id).then(resp => {
+    console.log("get list at home ", resp)
     const res_data = resp.data;
     const items = res_data.data;
     if (items && items.length < limit) {
       data.loader.more = false
     }
-    // data.posts = decoratePosts(items)
+    data.posts = decoratePosts(items)
     
     data.posts = items
     data.loader.ing = false
@@ -194,7 +197,7 @@ function refreshList(tabIndex, topic) {
     wx.showToast({
       title: '加载失败', icon: 'none'
     })
-    console.log("topic", err)
+    console.log("topic_id", err)
   })
 }
 
@@ -229,9 +232,9 @@ function onReachBottom() {
   if (tabIndex == 1) {
     filter = "val"
   }
-  var topic = undefined
+  var topic_id = undefined
   if (tabIndex == 0) {
-    topic = getSelectedTopic()
+    topic_id = getSelectedTopic()
   }
   var data = tabData[tabIndex]
   var posts = view.data.posts
@@ -241,14 +244,15 @@ function onReachBottom() {
     sinceId = posts[posts.length - 1].id
   }
   var current = view.data.tab.current
-  api.getPostList(sinceId, limit, filter, topic).then((resp) => {
+  api.getPostList(sinceId, limit, filter, topic_id).then((resp) => {
+    var res_data = resp.data;
     data.loader.ing = false
-    if (resp.data) {
-      if (resp.data.length < 20) {
+    if (res_data.data) {
+      if (res_data.data.length < 20) {
         console.log("no more data..." + sinceId)
         data.loader.more = false
       }
-      var styled = decoratePosts(resp.data)
+      var styled = decoratePosts(res_data.data)
       data.posts = posts.concat(styled)
       if (current == view.data.tab.current) {
         bindTabData(current)
@@ -265,7 +269,7 @@ function onReachBottom() {
   })
 }
 
-function listLoadMore(tabIndex, topic) {
+function listLoadMore(tabIndex, topic_id) {
 
 }
 
@@ -355,23 +359,27 @@ function report(post) {
 function decoratePosts(posts) {
   var result = []
   var author = app.globalData.userInfo
+  if(!posts){
+    return;
+  }
 
   for (var i = 0; i < posts.length; i++) {
     var post = posts[i]
-    var hide = (post.status >> 2) & 1
+    // var hide = (post.status >> 2) & 1
 
-    // 如是本人的帖子则不隐藏
-    if (post.author && author && post.author.id == author.id) {
-      hide = false
-    }
+    // // 如是本人的帖子则不隐藏
+    // if (post.author && author && post.author.id == author.id) {
+    //   hide = false
+    // }
 
-    // 如果是需要审核的帖子，即使本人也不显示直到已审核
-    // 因为微信审核人员会傻缺的以为你没有审核系统...
-    if ((post.status >> 3) & 1) {
-      hide = true
-    }
+    // // 如果是需要审核的帖子，即使本人也不显示直到已审核
+    // // 因为微信审核人员会傻缺的以为你没有审核系统...
+    // if ((post.status >> 3) & 1) {
+    //   hide = true
+    // }
 
-    if (!hide) {
+    // if (!hide) {
+    if (1) {
       result.push(decoratePost(post))
     }
   }
@@ -380,17 +388,7 @@ function decoratePosts(posts) {
 
 function decoratePost(post) {
   post.styled = util.decorateText(post.content)
-  var utcTime = post.created_at * 1000
-  post.time = util.formatTime(new Date(utcTime))
-  post.agoTime = util.agoTime(utcTime)
-  if (post.media) {
-    post.images = JSON.parse(post.media.path)
-  }
-  if (post.location) {
-    try {
-      post.location = JSON.parse(post.location)
-    } catch(err){}
-  }
+  post.created_at = util.formatTime(new Date(post.created_at))
   return post
 }
 
