@@ -52,48 +52,68 @@ function addNewImage(images) {
   view.setData({images: array})
 }
 
+function replyHook() {
+  if (!(app.globalData.userInfo && app.globalData.userInfo.nickname)) {
+    wx.switchTab({
+      url: '/pages/me/me',
+    })
+    setTimeout(function () {
+      wx.showToast({
+        title: '需要先绑定微信昵称才能发帖', icon: 'none', duration: 2000
+      })
+    }, 500);
+    return true
+  }
+  return false
+}
+
+
 function onClickSubmit() {
   if (util.isWhiteSpace(view.data.content) && (view.data.images.length == 0)) {
     return
   }
+  // if (replyHook()) {
+  //   return
+  // }
 
   // 文本内容
   var data = {
-    title: view.data.title,
-    content: view.data.content
+    title: view.data.title || "测试内容123",
+    content: view.data.content,
+    author_id: 1  // 用户id
   }
 
   // 地理位置
   if (view.data.location) {
     data.location = JSON.stringify(view.data.location)
   }
+  // attach topic  关联话题
+  // var topic = view.data.topic
+  // var tag = undefined
+  // if (topic.selected >= 0 && topic.selected < topic.items.length) {
+  //   tag = topic.items[topic.selected].text
+  //   data.content = '#' + tag + '# ' + data.content
+  // }
 
-  // attach topic
-  var topic = view.data.topic
-  var tag = undefined
-  if (topic.selected >= 0 && topic.selected < topic.items.length) {
-    tag = topic.items[topic.selected].text
-    data.content = '#' + tag + '# ' + data.content
-  }
-
+  // 上传图文
   var handler = undefined
   if (view.data.images.length > 0) {
     handler = uploadImages(data, view.data.images)
   } else {
     handler = uploadText(data)
   }
-
   // handle result
   wx.showLoading({
     title: '正在发送...',
   })
+
   handler.then((resp) => {
     wx.hideLoading()
-
+    console.log(resp, "=====")
     // 关联标签和文章
-    if (tag) {
-      linkTagPost(tag, resp.data.id)
-    }
+    // if (tag) {
+    //   linkTagPost(tag, resp.data.id)
+    // }
 
     // refresh list
     util.setResult({
@@ -101,23 +121,17 @@ function onClickSubmit() {
       ok: resp.statusCode == 200,
       data: resp.data
     })
-    //
-    if (resp.statusCode == 200) {
-      wx.navigateBack({ delta: 1 })
+    
+    if (resp.data && resp.data.errcode == 0) {
+      wx.navigateBack({ delta: 1 });
+      console.log("show toast...")
+      setTimeout(function () {
+        wx.showToast({
+          title: '已发布等待审核', icon: 'success',
+        })
+      }, 2000);
     }
 
-    // tips
-    if (resp.data && resp.data.status) {
-      var audit = ((resp.data.status >> 3) & 1) != 0
-      if (audit) {
-        console.log("show toast...")
-        setTimeout(function () {
-          wx.showToast({
-            title: '已发布等待审核', icon: 'none'
-          })
-        }, 1000);
-      }
-    }
   }).catch((err) => {
     // 发布失败
     console.log("write:", err)
@@ -147,7 +161,7 @@ function uploadImages(data, images) {
       array.push(uploadFile(images[i]))
     }
     Promise.all(array).then(results => {
-      var path = JSON.stringify(results)
+      var path = results;
       data.media = {
         path: path,
         type: 1,  // 1: image 2: audio 3: video
@@ -164,6 +178,7 @@ function uploadImages(data, images) {
 }
 
 // 貌似多图片上传很麻烦而且很容易出错...
+// TODO....
 function uploadFile(file) {
   return new Promise((res, rej) => {
     wx.uploadFile({

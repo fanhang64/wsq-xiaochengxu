@@ -10,6 +10,22 @@ App({
     wx.login({
       success: res => {
         // 发送 res.code 到后台换取 openId, sessionKey, unionId
+        return;
+        var code = res.code; //返回code
+          console.log(code, "登录。。。。。");
+          var appId = 'wx4b5a9beb9ca390ef';
+          var secret = '233d18b3ad200276f6c38ebe424488fd';
+          wx.request({
+            url: 'https://api.weixin.qq.com/sns/jscode2session?appid=' + appId + '&secret=' + secret + '&js_code=' + code + '&grant_type=authorization_code',
+            data: {},
+            header: {
+              'content-type': 'json'
+            },
+            success: function (res) {
+              var openid = res.data.openid //返回openid
+              console.log('openid为' + openid);
+            }
+          })
       }
     })
     // 获取用户信息
@@ -19,6 +35,8 @@ App({
           // 已经授权，可以直接调用 getUserInfo 获取头像昵称，不会弹框
           wx.getUserInfo({
             success: res => {
+              console.log(res, "=======app load....");
+
               // 可以将 res 发送给后台解码出 unionId
               this.globalData.userInfo = res.userInfo
 
@@ -41,6 +59,6 @@ App({
     posts: [],
     meta: {},
     userInfo: {},
-    topics: [],
+    topics: [{'text': '全部话题'}, {'text': '新需求'}, {'text': 'bug反馈'}],
   }
 })

@@ -26,11 +26,26 @@ Page({
     tabColor: kawa.Theme.TabSelectedColor || kawa.Theme.MainColor,
     favroColor: kawa.Theme.FavorColor || kawa.Theme.MainColor,
     speaker: {
-      title: "",
-      link: "",
+      title: "公告标题title",
+      link: "公告链接",
     },
-    tops: [],
-    posts: [],
+    tops: [
+      {'title': '标题1'}, {'title': '标题2'},
+      {'title': '标题3'}, {'title': '标题4'}
+    ],
+    posts: [
+      {
+        'author': {'avatar': '', 'nickname': 'nickname123'},
+        'agoTime': '2019-01-05',
+        'styled': [{'tag': '123'}, {'tag': '', 'text': '内容1111111'}],
+        'images': ['https://res.wx.qq.com/wxdoc/dist/assets/img/8Font.color.03f7bed7.png']
+      }, {
+        'author': {'avatar': '', 'nickname': '昵称啊'},
+        'agoTime': '2019-05-05',
+        'styled': [{'tag': 'abc', 'text': '只是内容嗷嗷！'}, {'tag': '123', 'text': '内容12222'}],
+        'images': []
+      }, {}
+    ],
     loader: {
       ing: false, // 是否正在加载
       more: true, // 是否有更多数据
@@ -39,11 +54,11 @@ Page({
       show: false,
     },
     meta: {
-      app_cover: "",
-      app_logo: "",
+      app_cover: "../../images/very-easy.jpg",  // 背景图
+      app_logo: "https://ss3.bdstatic.com/70cFv8Sh_Q1YnxGkpoWK1HF6hhy/it/u=3029109722,2485459817&fm=27&gp=0.jpg",
       app_name: "卡哇微社区",
-      pv: "",
-      users: ""
+      pv: "1055",
+      users: "100"
     },
     tab: {
       current: 0, //预设默认选中的栏目
@@ -117,9 +132,10 @@ Page({
 
   // 点击帖子
   topicClick: function(e) {
+    console.log(e, "=====点击帖子了");
     var idx = e.currentTarget.dataset.idx
     var post = this.data.posts[idx]
-    util.sendRequest('post', {
+    util.sendRequest('post', {  // 传递帖子数据
       idx: idx,
       post: post
     })

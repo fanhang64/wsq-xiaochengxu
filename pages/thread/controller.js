@@ -46,17 +46,19 @@ function fetch(options) {
       item: item
     })
 
-    // request comments
-    api.getCommentList(item.post.id).then(resp => {
-      view.setData({
-        comments: formatTimes(resp.data)
-      })
-      console.log("get comment data:", resp.data)
-    }).catch(err => {
-      console.log('thread:', err)
-    })
+    // request comments === 评论
+    // api.getCommentList(item.post.id).then(resp => {
+    //   view.setData({
+    //     comments: formatTimes(resp.data)
+    //   })
+    //   console.log("get comment data:", resp.data)
+    // }).catch(err => {
+    //   console.log('thread:', err)
+    // })
   }
+
   var item = util.getRequest("post")
+  console.log("那大的帖子数据", "=======", item)
   if (item) {
     setup(item)
     return
@@ -72,6 +74,7 @@ function fetch(options) {
       })
     })
   }
+
 }
 
 function onClickImage(e) {
@@ -226,9 +229,9 @@ function onClikcFavorPost(e) {
 
 // 对帖子评论
 function onClickReplyPost(e) {
-  if (replyHook()) {
-    return
-  }
+  // if (replyHook()) {
+  //   return
+  // }
   view.setData({ reply: { focus: true } })
 }
 

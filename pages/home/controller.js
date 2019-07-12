@@ -35,10 +35,6 @@ function onLoad(opt) {
   // 加载社区信息
   // api.getMetaData().then(resp => {
   //   var data = {
-  //     app_logo: resp.data.app_logo,
-  //     app_cover: resp.data.app_cover,
-  //     app_name: resp.data.app_name,
-  //     app_summary: resp.data.app_summary,
   //     app_pubtitle: resp.data.app_pubtitle,
   //     app_publink: resp.data.app_publink,
   //     app_copyright: resp.data.app_copyright,
@@ -62,8 +58,9 @@ function onLoad(opt) {
   // })
 
   // 加载置顶列表
-  api.getPostList(0, 1000, "top").then(resp => {
-    const items = resp.data
+  api.getPostList(0, 2, "top").then(resp => {
+    const res_data = resp.data
+    const items = res_data.data;
     if (items) {
       items.map( item => {
         item.title = getTitle(item)
@@ -74,10 +71,9 @@ function onLoad(opt) {
       console.log("get top-list:", items)
     }
   })
-
   // 进入第一次加载
   refreshList(view.data.tab.current)
-
+  return;
   // 用户信息
   try {
     const value = wx.getStorageSync('user')
@@ -137,6 +133,7 @@ function getTitle(item) {
 }
 
 function onClickNewPost(e) {
+  app.globalData.userInfo = {'nickname': '123'}
   if (app.globalData.userInfo && app.globalData.userInfo.nickname) {
     wx.navigateTo({
       url: '/pages/writer/writer',
@@ -175,10 +172,14 @@ function refreshList(tabIndex, topic) {
   bindTabData(tabIndex)
   console.log("load data for tab:" + tabIndex, "filter:" + fitler)
   api.getPostList(0, limit, fitler, topic).then(resp => {
-    if (resp.data && resp.data.length < limit) {
+    const res_data = resp.data;
+    const items = res_data.data;
+    if (items && items.length < limit) {
       data.loader.more = false
     }
-    data.posts = decoratePosts(resp.data)
+    // data.posts = decoratePosts(items)
+    
+    data.posts = items
     data.loader.ing = false
     if (view.data.tab.current == tabIndex) {
       bindTabData(tabIndex)
@@ -233,7 +234,7 @@ function onReachBottom() {
     topic = getSelectedTopic()
   }
   var data = tabData[tabIndex]
-  var posts = data.posts
+  var posts = view.data.posts
   var sinceId = 0
   var limit = 20
   if (posts && posts.length > 0) {
@@ -413,6 +414,8 @@ function deletePost(idx) {
 
 function onClickImage(e) {
   var index = e.target.dataset.idx
+  console.log(index)
+
   var array = index.split('-')
   
   var pid = parseInt(array[0])

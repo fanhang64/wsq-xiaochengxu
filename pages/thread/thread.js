@@ -14,7 +14,10 @@ Page({
       idx: null,
       post: {},
     },
-    comments: [],
+    comments: [
+      {'author': {'nickname': '名称123'}, 'content': '评论内容123', 'reply_list': [{'reply': true, 'author': {'nickname': '回复作者1'}, 'content': '回复的内容1'}]},
+      {'author': {'nickname': '名称235'}, 'content': '评论内容235', 'reply_list': []}
+    ],
     loader: {
       ing: false,
       more: true,
@@ -97,5 +100,6 @@ Page({
   },
   clickLocation: function(e) {
     ctr.onClickLocation(e)
-  }
+  },
+  preventTouchMove: function() {}
 })

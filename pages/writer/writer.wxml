@@ -1,7 +1,7 @@
 <!--pages/writer/writer.wxml-->
 <view class="card">
   <view>
-    <textarea bindinput="bindContent" placeholder="请输入文本" style="height: 3.3em" />
+    <textarea bindinput="bindContent" placeholder="请输入文本" style="height: 4.3em" />
   </view>
   <!-- image list -->
   <view class='image-list'>
@@ -21,8 +21,8 @@
         >
       </image>
     </view>
-    <view class="add" wx:if='{{images.length < 9}}' >
-      <image bindtap='chooseImage' src="{{theme}}/plus.png" ></image>
+    <view class="add" wx:if='{{images.length < 9}}' bindtap='chooseImage'>
+      <image src="{{theme}}/plus.png" ></image>
     </view>
   </view>
   <!-- 选择位置 -->

@@ -8,9 +8,11 @@ function setup(_view) {
 }
 
 function onLoad(options) {
-  const user = app.globalData.userInfo
+const user = app.globalData.userInfo
+  console.log(user, "=======user");
   if (user) {
     view.setData({ user: user })
+    return 
   }
   const meta = app.globalData.meta
   if (meta && meta.app_copyright) {

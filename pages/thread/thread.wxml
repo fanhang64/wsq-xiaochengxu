@@ -57,8 +57,8 @@
 
 <view class="card">
   <view>
-    <text style='margin-right:18rpx;'>评论 {{item.post.stats.comments}}</text>
-    <text style='margin: auto;'>赞 {{item.post.stats.favors}}</text>
+    <text style='margin-right:18rpx;'>评论 11{{item.post.stats.comments}}</text>
+    <text style='margin: auto;'>赞 20{{item.post.stats.favors}}</text>
   </view>
   <view class='line' />
 
@@ -157,7 +157,7 @@
 </view>
 
 <!-- 隐藏输入框 -->
-<view class='bg-mask' bindtap='clickMask' wx:if="{{reply.focus}}" >
+<view class='bg-mask' bindtap='clickMask' wx:if="{{reply.focus}}" catchtouchmove="preventTouchMove">
 </view>
 <view class="release" wx:if="{{reply.focus}}" catchtap='dumy'>
       <input class="text" bindinput='bindInput'

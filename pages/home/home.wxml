@@ -10,7 +10,7 @@
     <view class="v-right" style='margin-left: auto;'>
       <view class='app-name'>{{meta.app_name}}</view>
       <view class='subtitle' style='color: #ffffff11;'>
-        <text space="ensp">总浏览 {{meta.pv}} 用户数 {{meta.users}}</text>
+        <text space="ensp" style="color:white">总浏览 {{meta.pv}} 用户数 {{meta.users}}</text>
       </view>
     </view>
   </view>
@@ -80,7 +80,7 @@
           />
         <view>
           <view class='title b5'>{{item.author.nickname?item.author.nickname:'匿名'}}</view>
-          <view class='subtitle'>{{item.agoTime}}</view>
+          <view class='subtitle'>{{item.created_at}}</view>
         </view>
         <image class='menu' src="{{theme}}/menu.png" catchtap='clickMenu' data-idx='{{index}}' />
       </view>
@@ -92,7 +92,8 @@
             wx:for="{{item.styled}}" 
             wx:for-item="text" 
             wx:key="{{index}}"
-            class="{{text.tag?'highlight':''}}">{{text.text}} </text>
+            class="{{text.tag?'highlight':'highlight'}}">#bug#{{text.tag}} </text>
+          <text class='content'> {{item.content}} </text>
         </view>
         <!-- Image -->
         <view wx:if="{{item.images}}">

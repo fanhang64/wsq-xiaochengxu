@@ -3,7 +3,7 @@ const kawa = require('../kawa.js')
 
 // ALL server-side API
 //const Host = "http://127.0.0.1:1323"
-const Host = "https://wsq.kawaapp.com"
+const Host = "https://www.5ihouse.cn/minipro"
 const AppKey = kawa.AppKey
 
 let g = {
@@ -191,7 +191,7 @@ function updateUser(data) {
 // return self user-info
 function self() {
   return req({
-    url: `${Host}/api/users/self`,
+    url: `${Host}/users/`,
     method: 'GET'
   })
 }
@@ -222,13 +222,13 @@ function getUserFavorList(uid, since, limit) {
 function getPostList(since, limit, filter, topic) {
   if (!topic) {
     return req({
-      url: `${Host}/api/posts?since_id=${since}&limit=${limit}&filter=${filter}`,
+      url: `${Host}/post/?since_id=${since}&limit=${limit}&filter=${filter}`,
       method: 'GET'
     })
   } else {
     var encoded = encodeURIComponent(topic)
     return req({
-      url: `${Host}/api/tags/${encoded}/posts?since_id=${since}&limit=${limit}`,
+      url: `${Host}/post/tags/${encoded}/posts?since_id=${since}&limit=${limit}`,
       method: 'GET'
     })
   }
@@ -236,7 +236,7 @@ function getPostList(since, limit, filter, topic) {
 
 function getPost(id) {
   return req({
-    url: `${Host}/api/posts/${id}`,
+    url: `${Host}/post/${id}/`,
     method: 'GET'
   })
 }
@@ -244,7 +244,7 @@ function getPost(id) {
 // create post
 function createPost(data) {
   return req({
-    url: `${Host}/api/posts`,
+    url: `${Host}/post/`,
     method: 'POST',
     data: data,
   })
@@ -253,7 +253,7 @@ function createPost(data) {
 // update post
 function updatePost(id, data) {
   return req({
-    url: `${Host}/api/posts/${id}`,
+    url: `${Host}/post/${id}`,
     method: 'PUT',
     data: data
   })
@@ -262,7 +262,7 @@ function updatePost(id, data) {
 // delete post
 function deletePost(id) {
   return req({
-    url: `${Host}/api/posts/${id}`,
+    url: `${Host}/post/${id}/`,
     method: 'DELETE'
   })
 }
