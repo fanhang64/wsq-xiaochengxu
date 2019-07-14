@@ -5,6 +5,7 @@ const kawa = require('../kawa.js')
 //const Host = "http://127.0.0.1:1323"
 const Host = "https://www.5ihouse.cn/minipro"
 const AppKey = kawa.AppKey
+const app = getApp()
 
 let g = {
   token: "",
@@ -43,6 +44,7 @@ function req(options = {}) {
       dataType,
       responseType,
       success(r) {
+        console.log(r, "====");
         if (r.statusCode == 200) {
           res(r);
         } else if (r.statusCode == 401) {
@@ -82,8 +84,10 @@ function autoAuth() {
   return new Promise((res, rej) => {
     // check localstorage first
     const value = wx.getStorageSync('token')
+
     if (value && !util.jwtExpire(value)) {
       g.token = value
+      console.log("token not expire...")
       res(value)
       return
     }
@@ -94,28 +98,50 @@ function autoAuth() {
     wx.login({
       success: function (resp) {
         if (resp.code) {
-          console.log('get code:', resp.code)
+          console.log('get code:', resp)
           req({
-            url: `${Host}/api/auth`,
+            url: `${Host}/auth`,
             method: 'POST',
             data: {
               code: resp.code,
             }
           }).then((resp) => {
-            // 返回一个本地的 Token
-            console.log(resp)
-            if (resp.statusCode == 200) {
-              //success, save token
-              g.token = resp.data.access_token
-              console.log("get token", resp.data)
-              res(g.token)
-              wx.setStorage({
-                key: 'token',
-                data: g.token
-              })
-            } else {
-              rej({ code: -1, err: 'fail:' + resp.statusCode})
-            }
+            var res_data = resp.data.data; 
+            console.log("get auth ....", res_data)
+            req({
+              url: `${Host}/wx_login`,
+              method: 'POST',
+              data: {
+                openid: res_data.openid,
+                nickname: app.globalData.userInfo.nickName,
+                avatar_url: app.globalData.userInfo.avatarUrl,
+                gender: app.globalData.userInfo.gender
+              }
+            }).then((resp) => {
+                var res_data = resp.data.data;
+                console.log(res_data, "====res_data====")
+                var token = res_data.token
+                var user_id = res_data.user_id
+                // 返回一个本地的 Token
+                console.log(resp)
+                if (resp.statusCode == 200) {
+                  //success, save token
+                  g.token = token
+                  g.user_id = user_id
+                  console.log("get token", token)
+                  res(g.token)
+                  wx.setStorage({
+                    key: 'token',
+                    data: g.token
+                  })
+                  wx.setStorage({
+                    key: 'user_id',
+                    data: g.user_id
+                  })
+                } else {
+                  rej({ code: -1, err: 'fail:' + resp.statusCode})
+                }
+            })
           }).catch((err) => {
             console.log(err)
             rej({ code: -1, err: err })
@@ -420,7 +446,7 @@ function createReport(data) {
 // 解密接口
 function decrypt(data) {
   return req({
-    url: `${Host}/api/actions/decrypt`,
+    url: `${Host}/actions/decrypt`,
     method: 'POST',
     data: data,
   })

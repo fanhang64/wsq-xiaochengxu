@@ -8,8 +8,7 @@ function setup(_view) {
 }
 
 function onLoad(options) {
-const user = app.globalData.userInfo
-  console.log(user, "=======user");
+  const user = app.globalData.userInfo
   if (user) {
     view.setData({ user: user })
     return 
@@ -43,6 +42,7 @@ function onResult(data) {
 }
 
 function bindUserInfo(e) {
+  console.log(e, "====eeeee")
   var user = e.detail.userInfo
   if (user) {
     var data = {
@@ -68,6 +68,7 @@ function bindUserInfo(e) {
 }
 
 function getPhoneNumber(e) {
+  console.log(e, "get pphone.....");
   var ecrypted = e.detail.encryptedData
   var iv = e.detail.iv
   if (ecrypted && iv) {

@@ -17,6 +17,7 @@ Page({
     // auto login 
     api.autoAuth().then(() => {
       console.log("go to main page")
+
       wx.switchTab({
         url: '/pages/home/home',
       })
