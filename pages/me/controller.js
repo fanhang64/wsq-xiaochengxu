@@ -9,6 +9,8 @@ function setup(_view) {
 
 function onLoad(options) {
   const user = app.globalData.userInfo
+  console.log(user, "=====");
+
   if (user) {
     view.setData({ user: user })
     return 
@@ -42,14 +44,12 @@ function onResult(data) {
 }
 
 function bindUserInfo(e) {
-  console.log(e, "====eeeee")
+
   var user = e.detail.userInfo
   if (user) {
     var data = {
       avatar: user.avatarUrl,
-      city: user.city,
       gender: user.gender,
-      language: user.language,
       nickname: user.nickName
     }
     api.updateUser(data).then((resp) => {
@@ -68,7 +68,7 @@ function bindUserInfo(e) {
 }
 
 function getPhoneNumber(e) {
-  console.log(e, "get pphone.....");
+  console.log(e, "get phone.....");
   var ecrypted = e.detail.encryptedData
   var iv = e.detail.iv
   if (ecrypted && iv) {

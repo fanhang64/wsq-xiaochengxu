@@ -27,23 +27,20 @@ function onLoad(options) {
 
 function fetch(options) {
   function setup(req_data) {
-    var date = new Date(req_data.post.created_at)
-    req_data.post.created_at = util.formatTime(date);
-
     // set post data
     view.setData({
       item: req_data
     })
 
     // request comments === 评论
-    // api.getCommentList(item.post.id).then(resp => {
-    //   view.setData({
-    //     comments: formatTimes(resp.data)
-    //   })
-    //   console.log("get comment data:", resp.data)
-    // }).catch(err => {
-    //   console.log('thread:', err)
-    // })
+    api.getCommentList(item.post.id).then(resp => {
+      view.setData({
+        comments: formatTimes(resp.data)
+      })
+      console.log("get comment data:", resp.data)
+    }).catch(err => {
+      console.log('thread:', err)
+    })
   }
 
   var req_data = util.getRequest("post")
@@ -55,7 +52,9 @@ function fetch(options) {
   var pid = options.pid
   if (pid) {
     api.getPost(pid).then(resp => {
-      setup({ idx: -1, post: resp.data })
+      var resp_data = resp.data
+      console.log("获取单个post，", resp)
+      setup({ idx: -1, post: resp_data.data[0] })
     }).catch(err => {
       console.log(err)
       wx.showToast({

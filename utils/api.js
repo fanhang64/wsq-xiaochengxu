@@ -4,11 +4,11 @@ const kawa = require('../kawa.js')
 // ALL server-side API
 //const Host = "http://127.0.0.1:1323"
 const Host = "https://www.5ihouse.cn/minipro"
-const AppKey = kawa.AppKey
 const app = getApp()
 
 let g = {
   token: "",
+  user_id: "",
 }
 
 // setup promise
@@ -32,7 +32,6 @@ function req(options = {}) {
   // inject token
   const header = Object.assign({
     'Authorization': `Bearer ${g.token}`,
-    'AppKey': AppKey, 
   }, options.header);
 
   return new Promise((res, rej) => {
@@ -44,7 +43,6 @@ function req(options = {}) {
       dataType,
       responseType,
       success(r) {
-        console.log(r, "====");
         if (r.statusCode == 200) {
           res(r);
         } else if (r.statusCode == 401) {
@@ -84,9 +82,11 @@ function autoAuth() {
   return new Promise((res, rej) => {
     // check localstorage first
     const value = wx.getStorageSync('token')
+    const user_id = wx.getStorageSync('user_id')
 
     if (value && !util.jwtExpire(value)) {
       g.token = value
+      g.user_id = user_id
       console.log("token not expire...")
       res(value)
       return
@@ -119,7 +119,6 @@ function autoAuth() {
               }
             }).then((resp) => {
                 var res_data = resp.data.data;
-                console.log(res_data, "====res_data====")
                 var token = res_data.token
                 var user_id = res_data.user_id
                 // 返回一个本地的 Token
@@ -224,21 +223,21 @@ function getUser() {
 
 function getUserPostList(uid, since, limit) {
   return req({
-    url: `${Host}/api/users/${uid}/posts?since_id=${since}&limit=${limit}`,
+    url: `${Host}/user/${uid}/posts?since_id=${since}&limit=${limit}`,
     method: 'GET'
   })
 }
 
 function getUserCommentList(uid, since, limit) {
   return req({
-    url: `${Host}/api/users/${uid}/comments?since_id=${since}&limit=${limit}`,
+    url: `${Host}/api/users/${uid}/posts?since_id=${since}&limit=${limit}&comment=1`,
     method: 'GET'
   })
 }
 
 function getUserFavorList(uid, since, limit) {
   return req({
-    url: `${Host}/api/users/${uid}/favors?since_id=${since}&limit=${limit}`,
+    url: `${Host}/user/${uid}/posts?since_id=${since}&limit=${limit}&favor=1`,
     method: 'GET'
   })
 }
@@ -260,7 +259,7 @@ function getPostList(sinceId, limit, filter, topic_id) {
 
 function getPost(id) {
   return req({
-    url: `${Host}/post/${id}/`,
+    url: `${Host}/post/${id}`,
     method: 'GET'
   })
 }
@@ -294,14 +293,14 @@ function deletePost(id) {
 // get comment list
 function getCommentList(pid, since, limit) {
   return req({
-    url: `${Host}/api/posts/${pid}/comments`,
+    url: `${Host}/post/${pid}/comments`,
     method: 'GET'
   })
 }
 
 function createComment(data) {
   return req({
-    url: `${Host}/api/posts/comments`,
+    url: `${Host}/post/comments`,
     method: 'POST',
     data: data,
   })
@@ -309,44 +308,51 @@ function createComment(data) {
 
 function updateComment(id, data) {
   return req({
-    url: `${Host}/api/posts/comments/${id}`,
+    url: `${Host}/post/comments/${id}`,
     method: 'PUT'
   })
 }
 
 function deleteComment(id) {
   return req({
-    url: `${Host}/api/posts/comments/${id}`,
+    url: `${Host}/post/comments/${id}`,
     method: 'DELETE'
   })
 }
 
 // favors
-function getPostFavorList(pid, since, limit) {
+function getPostFavorList(user_id) {  // 获取某个用户点赞的帖子
   return req({
-    url: `${Host}/api/posts/${pid}/favors?since_id=${since}&limit=${limit}`,
+    url: `${Host}/post/favors?user_id=${user_id}`,
     method: 'GET'
   })
 }
 
 function getPostFavorCount(pid) {
   return req({
-    url: `${Host}/api/posts/${pid}/favors/count`,
+    url: `${Host}/post/favors/?post_id=${pid}`,
     method: 'GET'
   })
 }
 
-function createPostFavor(pid) {
+function getPostStatCount(pid){
   return req({
-    url: `${Host}/api/posts/favors`,
-    method: 'POST',
-    data: {pid: pid}
+    url: `${Host}/post/stats/?post_id=${pid}`,
+    method: 'GET'
   })
 }
 
-function deletePostFavor(pid) {
+function createPostFavor(pid, from_uid, to_uid) {
   return req({
-    url: `${Host}/api/posts/${pid}/favors`,
+    url: `${Host}/post/favors/`,
+    method: 'POST',
+    data: {post_id: pid, from_user_id: from_uid, to_user_id:to_uid}
+  })
+}
+
+function deletePostFavor(pid, from_uid) {
+  return req({
+    url: `${Host}/post/favors/${pid}?user_id=${from_uid}`,
     method: 'DELETE'
   })
 }
@@ -471,6 +477,8 @@ module.exports = {
   createPost: createPost,
   deletePost: deletePost,
 
+  // stats
+  getPostStatCount: getPostStatCount,
 
   // comment
   getCommentList: getCommentList,

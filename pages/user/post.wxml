@@ -7,7 +7,7 @@
         />
       <view>
         <view class='title b5'>{{item.author.nickname?item.author.nickname:'匿名'}}</view>
-        <view class='subtitle'>{{item.time}}</view>
+        <view class='subtitle'>{{item.created_at}}</view>
       </view>
     </view>
     <view style='margin-bottom:6rpx;'/>

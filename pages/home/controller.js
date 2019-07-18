@@ -71,6 +71,15 @@ function onLoad(opt) {
       console.log("get top-list:", items)
     }
   })
+  
+  var user_id = wx.getStorageSync('user_id')
+
+  api.getPostFavorList(user_id).then( resp => {
+    console.log("get favor list ", resp)
+    var res_data = resp.data
+    wx.setStorage({ key: 'favor_post_id_list', data: res_data.data || [] })
+  })
+
   // 进入第一次加载
   refreshList(view.data.tab.current)
 
@@ -278,23 +287,26 @@ function onClickFavor(e) {
   var item = view.data.posts[idx]
   var key = 'posts[' + idx + '].stats'
 
-  if (!item.stats) {
-    item.stats = { favored: false, favors: 0, comments: 0 }
-  }
-
+  var user_id = wx.getStorageSync('user_id')
+  var favor_post_id_list = wx.getStorageSync('favor_post_id_list')
   if (item.stats.favored && item.stats.favored > 0) {
     console.log("delete favor")
-    api.deletePostFavor(item.id).then(resp => {
-      item.stats.favored = false,
-        item.stats.favors -= 1
+    api.deletePostFavor(item.id, user_id).then(resp => {
+      item.stats.favored = false
+      item.stats.favors -= 1
+      var index = favor_post_id_list.indexOf(item.id)
+      favor_post_id_list.splice(index, 1)
+      wx.setStorage({key: 'favor_post_id_list', data: favor_post_id_list})
       view.setData({ [key]: item.stats })
       console.log("delete favor:", resp.statusCode)
     })
   } else {
     console.log("create favor")
-    api.createPostFavor(item.id).then((resp) => {
+    api.createPostFavor(item.id, user_id, item.user_id).then((resp) => {
       item.stats.favors += 1
       item.stats.favored = true
+      favor_post_id_list.push(item.id)
+      wx.setStorage({key: 'favor_post_id_list', data: favor_post_id_list})
       view.setData({ [key]: item.stats })
       console.log("favor succ:", resp.statusCode)
     }).catch(err => {
@@ -363,6 +375,7 @@ function decoratePosts(posts) {
     return;
   }
 
+  var favor_post_id_list = wx.getStorageSync('favor_post_id_list')
   for (var i = 0; i < posts.length; i++) {
     var post = posts[i]
     // var hide = (post.status >> 2) & 1
@@ -380,15 +393,18 @@ function decoratePosts(posts) {
 
     // if (!hide) {
     if (1) {
-      result.push(decoratePost(post))
+      result.push(decoratePost(post, favor_post_id_list))
     }
   }
   return result
 }
 
-function decoratePost(post) {
+function decoratePost(post, favor_post_id_list) {
   post.styled = util.decorateText(post.content)
-  post.created_at = util.formatTime(new Date(post.created_at))
+  post.created_at = util.agoTime(new Date(post.created_at))
+  if(favor_post_id_list.indexOf(post.id) > -1){
+    post.stats.favored = true
+  }
   return post
 }
 

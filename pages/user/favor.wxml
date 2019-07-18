@@ -4,12 +4,12 @@
     <text class='title'>{{item.entity_type?'赞了此评论':'赞了这篇帖子'}}</text>
     <view class="horizontal gray-bg p-2">
       <image class='avatar-large' style='margin: 9.36rpx 9.36rpx 9.36rpx 0px;'
-        src="{{item.actor.avatar?item.actor.avatar: theme+'/user_icon.png'}}" 
+        src="{{item.author.avatar?item.author.avatar: theme+'/user_icon.png'}}" 
         />
       <view>
-        <view class='title'>{{item.actor.nickname?item.actor.nickname:'匿名'}}</view>
+        <view class='title'>{{item.author.nickname?item.author.nickname:'匿名'}}</view>
         <view style='width:560rpx'>
-          <text class='subtitle single-line'>{{item.subject}}</text>
+          <text class='subtitle single-line'>{{item.content}}</text>
         </view>
       </view>
     </view>

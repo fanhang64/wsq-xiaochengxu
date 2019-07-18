@@ -18,7 +18,7 @@ Page({
     copyright: "",
     support: true,
     metadata: {
-      user_mode: 1, // 0, 1, 2
+      user_mode: 0, // 0, 1, 2
     }
   },
 

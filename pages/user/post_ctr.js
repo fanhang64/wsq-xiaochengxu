@@ -9,6 +9,9 @@ function setup(v) {
 function onLoad(options) {
   if (options && options.uid) {
     view.data.user.uid = options.uid
+  }else{
+    var uid = wx.getStorageSync('user_id')
+    view.data.user.uid = uid
   }
 
   // show loading
@@ -17,14 +20,15 @@ function onLoad(options) {
   view.setData({loader: loader})
 
   // fetch data 
-  api.getUserPostList(view.data.user.uid).then(resp => {
+  api.getUserPostList(view.data.user.uid, 0, 20).then(resp => {
+    var resp_data = resp.data
     loader.ing = false
-    if (resp.data && resp.data.length < 20) {
+    if (resp_data.data && resp_data.data.length < 20) {
       loader.more = false
     }
-    console.log("user get posts:", resp)
-    var posts = decorateList(resp.data)
-    view.setData({ posts: resp.data })
+    console.log("user get posts:", resp_data)
+    var posts = decorateList(resp_data.data)
+    view.setData({ posts: posts })
     view.setData({ loader: loader })
   }).catch( err => {
     console.log(err)
@@ -47,12 +51,13 @@ function onPullDownRefresh() {
   view.setData({ loader: loader })
 
   // fetch data
-  api.getUserPostList(view.data.user.uid).then(resp => {
+  api.getUserPostList(view.data.user.uid, 0, 20).then(resp => {
+    var resp_data = resp.data;
     loader.ing = false
-    if (resp.data && resp.data.length < 20) {
+    if (resp_data.data && resp_data.data.length < 20) {
       loader.more = false
     }
-    var data = decorateList(resp.data)
+    var data = decorateList(resp_data.data)
     view.setData({ posts: data })
     view.setData({ loader: loader })
     wx.stopPullDownRefresh()
@@ -82,11 +87,12 @@ function onReachBottom() {
   loader.ing = true
   view.setData({loader: loader})
   api.getUserPostList(view.data.user.uid, since, limit).then(resp => {
+    var resp_data = resp.data
     loader.ing = false
-    if (resp.data.length < limit) {
+    if (resp_data.data.length < limit) {
       loader.more = false
     }
-    var data = decorateList(resp.data)
+    var data = decorateList(resp_data.data)
     view.setData({ loader: loader })
     view.setData({ posts: posts.concat(data) })
   }).catch( err=> {
@@ -99,6 +105,7 @@ function onReachBottom() {
 function onClickItem(e) {
   var idx = e.currentTarget.dataset.idx
   var post = view.data.posts[idx]
+  console.log(post, "=======")
   // 跳转到帖子，并设置为已读
   wx.navigateTo({
     url: '/pages/thread/thread?pid=' + post.id,
@@ -124,8 +131,8 @@ function onClickImage(e) {
 function decorateList(posts) {
   var i = 0, n = posts.length
   for (; i < n; i++) {
-    var utcTime = posts[i].created_at * 1000
-    posts[i].time = util.formatTime(new Date(utcTime))
+    var time = posts[i].created_at
+    posts[i].created_at = util.formatTime(new Date(time))
     if (posts[i].media) {
       posts[i].images = JSON.parse(posts[i].media.path)
     }

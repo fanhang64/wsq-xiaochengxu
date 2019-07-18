@@ -73,18 +73,19 @@ function onClickSubmit() {
   if (util.isWhiteSpace(view.data.content) && (view.data.images.length == 0)) {
     return
   }
-  // if (replyHook()) {
-  //   return
-  // }
+  if (replyHook()) {
+    return
+  }
 
   // 文本内容
   var selected = view.data.topic.selected;
+  const user_id = wx.getStorageSync('user_id')
 
+  console.log(view.data.topic, "====topic ")
   var data = {
-    title: view.data.title || "测试内容123",
+    title: view.data.title || "标题",
     content: view.data.content,
-    author_id: 1,  // 用户id
-    topic_id: view.data.topic.items[selected].id
+    author_id: user_id,  // 用户id
   }
 
   // 地理位置
@@ -97,6 +98,7 @@ function onClickSubmit() {
   if (topic.selected >= 0 && topic.selected < topic.items.length) {
     tag = topic.items[topic.selected].name
     data.content = '#' + tag + '# ' + data.content
+    data.topic_id = view.data.topic.items[selected].id
   }
 
   // 上传图文
@@ -113,7 +115,6 @@ function onClickSubmit() {
 
   handler.then((resp) => {
     wx.hideLoading()
-    console.log(resp, "=====")
 
     // refresh list
     util.setResult({
@@ -130,6 +131,8 @@ function onClickSubmit() {
           title: '已发布等待审核', icon: 'success',
         })
       }, 2000);
+    }else{
+      throw Error(resp.data.errmsg)
     }
 
   }).catch((err) => {
