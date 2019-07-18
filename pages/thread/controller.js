@@ -33,7 +33,7 @@ function fetch(options) {
     })
 
     // request comments === 评论
-    api.getCommentList(item.post.id).then(resp => {
+    api.getCommentList(req_data.id).then(resp => {
       view.setData({
         comments: formatTimes(resp.data)
       })
@@ -186,12 +186,17 @@ function onClikcFavorPost(e) {
     view.setData({ item: { post: p } })
   }
   var p = view.data.item.post
+  var user_id = wx.getStorageSync('user_id')
+  var favor_post_id_list = wx.getStorageSync('favor_post_id_list')
   if (p.stats && p.stats.favored) {
-    api.deletePostFavor(p.id).then(resp => {
+    api.deletePostFavor(p.id, user_id).then(resp => {
       p.stats.favored = 0
       if (p.stats.favors > 0) {
         p.stats.favors -= 1
       }
+      var index = favor_post_id_list.indexOf(p.id)
+      favor_post_id_list.splice(index, 1)
+      wx.setStorage({key: 'favor_post_id_list', data: favor_post_id_list})
       updateFavorState(p)
     }).catch(err => {
       wx.showToast({
@@ -201,9 +206,11 @@ function onClikcFavorPost(e) {
       console.log(err)
     })
   } else {
-    api.createPostFavor(p.id).then(resp => {
+    api.createPostFavor(p.id, user_id, p.user_id).then(resp => {
       p.stats.favored = 1
       p.stats.favors += 1
+      favor_post_id_list.push(p.id)
+      wx.setStorage({key: 'favor_post_id_list', data: favor_post_id_list})
       updateFavorState(p)
     }).catch(err => {
       wx.showToast({
