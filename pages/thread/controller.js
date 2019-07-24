@@ -33,11 +33,14 @@ function fetch(options) {
     })
 
     // request comments === 评论
-    api.getCommentList(req_data.id).then(resp => {
+    api.getCommentList(req_data.post.id).then(resp => {
+      var resp_data = resp.data;
+      console.log("get comment data:", resp_data.data)
+      var resp_data = resp.data;
+      var comments = formatTimes(resp_data.data);
       view.setData({
-        comments: formatTimes(resp.data)
+        comments: comments
       })
-      console.log("get comment data:", resp.data)
     }).catch(err => {
       console.log('thread:', err)
     })
@@ -80,9 +83,11 @@ function onPullDownRefresh(e) {
   }
   var pid = view.data.item.post.id
   api.getCommentList(pid).then(resp => {
+    var resp_data = resp.data;
     wx.stopPullDownRefresh()
-    if (resp.data) {
-      view.setData({ comments: resp.data })
+    var comments = formatTimes(resp_data.data);
+    if (resp_data.data) {
+      view.setData({ comments: comments})
     }
   }).catch(err => {
     wx.stopPullDownRefresh()
@@ -126,7 +131,7 @@ function onReachBottom(e) {
 }
 
 function replyHook() {
-  if (!(app.globalData.userInfo && app.globalData.userInfo.nickname)) {
+  if (!(app.globalData.userInfo && app.globalData.userInfo.nickName)) {
     wx.switchTab({
       url: '/pages/me/me',
     })
@@ -294,9 +299,12 @@ function onClickListComment(e) {
 
 function onClickListCommentAction(e) {
   var idx = e.currentTarget.dataset.idx
+  console.log(e.currentTarget.dataset);
+
   var array = idx.split('-')
   var index = array[0], sub = array[1]
 
+  // 自己删除评论
   var actionDelete = function() {
     if (replyHook()) {
       return;
@@ -304,6 +312,7 @@ function onClickListCommentAction(e) {
     deleteComment(index, sub)
   }
 
+  // 评论回复
   var actionReply = function() {
     if (replyHook()) { 
       return; 
@@ -338,8 +347,9 @@ function onClickListCommentAction(e) {
   } else {
     uid = view.data.comments[index].author.id
   }
-  var user = app.globalData.userInfo
-  if (user && user.id == uid) {
+
+  var login_uid = wx.getStorageSync('user_id')
+  if (login_uid && login_uid == uid) {
     menu.items.push("删除")
     menu.actions.push(actionDelete)
   }
@@ -348,7 +358,7 @@ function onClickListCommentAction(e) {
 
 function deleteComment(index, sub) {
   var item = {}
-  if (sub) {
+  if (sub) {  // 带子菜单
     var reply_list = view.data.comments[index].reply_list
     var key = 'comments[' + index + '].reply_list'
 
@@ -408,19 +418,20 @@ function replyToPost(replyText) {
     console.log("data is empty!")
     return
   }
-
+  var uid = wx.getStorageSync('user_id')
   var post = view.data.item.post
   var data = {
+    uid: uid,
     content: replyText,
     post_id: post.id,
-    reply_id: post.author.id
   }
 
   // send comment
   api.createComment(data).then(resp => {
-    formatTime(resp.data)
+    var resp_data = resp.data
+    formatTime(resp_data.data)
     var comments = view.data.comments
-    comments.unshift(resp.data)
+    comments.unshift(resp_data.data)
     view.setData({
       comments: comments,
     })
@@ -507,8 +518,8 @@ function replyToComment(idx, subIndex) {
 function formatTimes(comments) {
   var i = 0, n = comments.length
   for (; i < n; i++) {
-    var utc = new Date(comments[i].created_at * 1000)
-    comments[i].time = util.formatTime(utc)
+    var utc = new Date(comments[i].created_at)
+    comments[i].created_at = util.formatTime(utc)
     var reply_list = comments[i].reply_list
     comments[i].reply_list = decorateReplyList(reply_list)
   }
@@ -528,8 +539,8 @@ function decorateReplyList(list) {
 }
 
 function formatTime(item) {
-  var utc = new Date(item.created_at * 1000)
-  item.time = util.formatTime(utc)
+  var utc = new Date(item.created_at)
+  item.created_at = util.formatTime(utc)
 }
 
 function showActionSheet(menus, actions) {

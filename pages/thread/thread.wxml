@@ -98,7 +98,7 @@
         <!-- Comment and Favor bar-->
         <view class='flow-right' style='margin-top:9rpx;'>
           <!-- date -->
-          <view class='subtitle' style='margin-right:auto;'>{{item.time}}</view>
+          <view class='subtitle' style='margin-right:auto;'>{{item.created_at}}</view>
 
           <!-- Commennt -->
           <view class='img-text' style='margin-right:18rpx'
