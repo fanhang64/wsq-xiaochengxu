@@ -41,7 +41,7 @@ Page({
     meta: {
       app_cover: "../../images/very-easy.jpg",  // 背景图
       app_logo: "https://ss3.bdstatic.com/70cFv8Sh_Q1YnxGkpoWK1HF6hhy/it/u=3029109722,2485459817&fm=27&gp=0.jpg",
-      app_name: "卡哇微社区",
+      app_name: "多多微社区",
       pv: "1055",
       users: "100"
     },
