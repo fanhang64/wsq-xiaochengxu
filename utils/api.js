@@ -412,23 +412,23 @@ function linkTopicPost(data) {
 }
 
 // message
-function getMessageList(q, since, limit) {
+function getMessageList(q, uid, since, limit) {
   return req({
-    url: `${Host}/api/messages?q=${q}&since_id=${since}&limit=${limit}`,
+    url: `${Host}/user/${uid}/messages?q=${q}&since_id=${since}&limit=${limit}`,
     method: 'GET'
   })
 }
 
-function getMessageCount() {
+function getMessageCount(uid) {
   return req({
-    url: `${Host}/api/messages/count`,
+    url: `${Host}/user/${uid}/messages/count`,
     method: 'GET'
   })
 }
 
-function setMessageRead(id) {
+function setMessageRead(id, msg_type) {
   return req({
-    url: `${Host}/api/messages/${id}/read`,
+    url: `${Host}/messages/${id}/read?msg_type=${msg_type}`,
     method: 'PUT'
   })
 }

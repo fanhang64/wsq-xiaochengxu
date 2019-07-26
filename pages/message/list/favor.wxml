@@ -4,15 +4,15 @@
         bindtap='clickItem' data-idx="{{index}}">
     <view class="h-top"  style='padding-left:28rpx;'>
       <image class='avatar-large' style='margin: 0px 18rpx;'
-        src="{{item.from.avatar?item.from.avatar: theme+'/user_icon.png'}}" 
+        src="{{item.author.avatar?item.author.avatar: theme+'/user_icon.png'}}" 
         />
       <view style='width:100%;'>
         <view class='fade-title'>
-          {{item.from.nickname?item.from.nickname:'匿名'}}
+          {{item.author.user_name?item.author.user_name:'匿名'}}
           赞了你
         </view>
-        <view class='title'>{{item.subject}}</view>
-        <view class='subtitle' style='margin-top:18rpx;' >{{item.time}}</view>
+        <view class='title'>{{item.content}}</view>
+        <view class='subtitle' style='margin-top:18rpx;' >{{item.created_at}}</view>
       </view>
     </view>
   </view>

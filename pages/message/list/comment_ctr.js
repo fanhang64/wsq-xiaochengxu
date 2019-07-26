@@ -7,8 +7,10 @@ function setup(_view) {
 }
 
 function onLoad(opt) {
-  api.getMessageList('comment').then(resp => {
-    var unpacked = unpackMsgContent(resp.data)
+  var user_id = wx.getStorageSync('user_id')
+  api.getMessageList('comment', user_id, 0, 20).then(resp => {
+    var resp_data = resp.data
+    var unpacked = unpackMsgContent(resp_data.data)
     view.setData({ messages: unpacked })
   })
 }
@@ -17,18 +19,19 @@ function onPullDownRefresh() {
   if (view.data.loader.ing) {
     return
   }
-
+  var user_id = wx.getStorageSync('user_id')
   view.setData({ loader: {ing: true} })
-  api.getMessageList('comment').then(resp => {
+  api.getMessageList('comment', user_id, 0, 20).then(resp => {
+    var resp_data = resp.data
     wx.stopPullDownRefresh()
     var loader = {ing: false}
-    var unpacked = unpackMsgContent(resp.data)
+    var unpacked = unpackMsgContent(resp_data.data)
     if (unpacked && unpacked.length < 20) {
       loader.more = false
     }
     view.setData({ loader: loader })
     view.setData({ messages: unpacked })
-    console.log(resp)
+    console.log(resp_data)
   }).catch(err => {
     wx.stopPullDownRefresh()
     view.setData({ loader: { ing: false } })
@@ -43,6 +46,7 @@ function onReachBottom() {
   if (view.data.loader.ing || !view.data.loader.more) {
     return
   }
+  var user_id = wx.getStorageSync('user_id')
   var messages = view.data.messages
   var since = 0
   var limit = 20
@@ -50,13 +54,14 @@ function onReachBottom() {
     since = messages[messages.length - 1].id
   }
   view.setData({ loader: { ing: true } })
-  api.getMessageList('comment', since, limit).then(resp => {
+  api.getMessageList('comment', user_id, since, limit).then(resp => {
+    var resp_data = resp.data
     var loader = {ing: false}
-    if (resp.data.length < limit) {
+    if (resp_data.data.length < limit) {
       loader.more = false
     }
     view.setData( {loader: loader })
-    var unpacked = unpackMsgContent(resp.data)
+    var unpacked = unpackMsgContent(resp_data.data)
     view.setData({ messages: messages.concat(unpacked) })
   }).catch( err => {
     view.setData({ loader: { ing: false } })
@@ -74,7 +79,7 @@ function onClickItem(e) {
   wx.navigateTo({
     url: '/pages/thread/thread?pid=' + msg.post_id,
   })
-  api.setMessageRead(msg.id).then(resp => {
+  api.setMessageRead(msg.id, 'comment').then(resp => {
     view.setData({
       [key]: 1,
     })
@@ -95,7 +100,7 @@ function unpackMsgContent(msgs) {
     } else {
       msgs[i].comment = msgs[i].content
     }
-    msgs[i].time = util.formatTime(new Date(msgs[i].created_at * 1000))
+    msgs[i].time = util.formatTime(new Date(msgs[i].created_at))
   }
   return msgs
 }
