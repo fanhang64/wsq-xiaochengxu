@@ -13,7 +13,7 @@ Page({
     user: {
       avatar: '',
       nickname: '',
-      summary: '啦啦啦 我是卖报的小行家',
+      summary: '',
     }, 
     copyright: "",
     support: true,

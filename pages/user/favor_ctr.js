@@ -18,6 +18,7 @@ function onLoad(options) {
 
   api.getUserFavorList(view.data.user.uid, 0, 20).then(resp => {
     var resp_data = resp.data
+    console.log("get user favor list ", resp_data)
     loader.ing = false
     if (resp_data.data && resp_data.data.length < 20) {
       loader.more = false

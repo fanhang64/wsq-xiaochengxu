@@ -53,11 +53,12 @@ function onReachBottom() {
   }
   view.setData({ loader: { ing: true } })
   api.getMessageList('favor', since, limit).then(resp => {
+    var resp_data = resp.data
     var loader = { ing: false, more: true }
-    if (resp.data.length < limit) {
+    if (resp_data.data.length < limit) {
       loader.more = false
     }
-    var unpacked = unpackMsgContent(resp.data)
+    var unpacked = unpackMsgContent(resp_data.data)
     view.setData({ loader: loader })
     view.setData({ messages: messages.concat(unpacked) })
   }).catch( err => {
@@ -97,7 +98,7 @@ function unpackMsgContent(msgs) {
     } else {
       msgs[i].subject = msgs[i].content
     }
-    msgs[i].time = util.formatTime(new Date(msgs[i].created_at * 1000))
+    msgs[i].time = util.formatTime(new Date(msgs[i].created_at))
   }
   return msgs
 }

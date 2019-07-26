@@ -230,7 +230,7 @@ function getUserPostList(uid, since, limit) {
 
 function getUserCommentList(uid, since, limit) {
   return req({
-    url: `${Host}/api/users/${uid}/posts?since_id=${since}&limit=${limit}&comment=1`,
+    url: `${Host}/user/${uid}/posts?since_id=${since}&limit=${limit}&comment=1`,
     method: 'GET'
   })
 }

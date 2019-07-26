@@ -6,20 +6,26 @@ function setup(_view) {
 }
 
 function onLoad(options) {
+  var uid = wx.getStorageSync('user_id')
+
   if (options && options.uid) {
     view.data.user.uid = options.uid
+  }
+  if (uid){
+    view.data.user.uid = uid
   }
   var loader = view.data.loader
   loader.ing = true
   view.setData({loader: loader})
-  api.getUserCommentList(view.data.user.uid).then(resp => {
+  api.getUserCommentList(view.data.user.uid, 0, 20).then(resp => {
+    var resp_data = resp.data
     loader.ing = false
-    if (resp.data && resp.data.length < 20) {
+    if (resp_data.data && resp_data.data.length < 20) {
       loader.more = false
     }
     view.setData({ loader: loader })
-    view.setData({ comments: resp.data })
-    console.log("get comment:", resp.data)
+    view.setData({ comments: resp_data.data })
+    console.log("get comment:", resp_data.data)
   }).catch( err => {
     console.log(err)
     loader.ing = false
@@ -36,13 +42,14 @@ function onPullDownRefresh() {
   loader.ing = true
   view.setData({ loader: loader })
 
-  api.getUserCommentList(view.data.user.uid).then(resp => {
+  api.getUserCommentList(view.data.user.uid, 0, 20).then(resp => {
+    var resp_data = resp.data
     loader.ing = false
-    if (resp.data && resp.data.length < 20) {
+    if (resp_data.data && resp_data.data.length < 20) {
       loader.more = false
     }
     view.setData({ loader: loader })
-    view.setData({ comments: resp.data })
+    view.setData({ comments: resp_data.data })
     wx.stopPullDownRefresh()
     wx.showToast({
       title: '刷新成功',
@@ -72,12 +79,13 @@ function onReachBottom() {
   loader.ing = true
   view.setData({ loader: loader})
   api.getUserCommentList(view.data.user.uid, since, limit).then(resp => {
+    var resp_data = resp.data
     loader.ing = false
-    if (resp.data.length < limit) {
+    if (resp_data.data.length < limit) {
       loader.more = false
     }
     view.setData({ loader: loader })
-    view.setData({ comments: comments.concat(resp.data) })
+    view.setData({ comments: comments.concat(resp_data.data) })
   }).catch(err => {
     loader.ing = false
     view.setData({ loader: loader })

@@ -79,7 +79,7 @@
         <view class='detail'>{{item.content}}</view>
 
         <!-- Reply List / Comment on Comment  -->
-        <view wx:if='{{item.reply_list}}' class='gray-bg reply'>
+        <view wx:if='{{item.reply_list.length}}' class='gray-bg reply'>
           <view
             wx:for="{{item.reply_list}}" 
             wx:for-item="item"
@@ -101,14 +101,14 @@
           <view class='subtitle' style='margin-right:auto;'>{{item.created_at}}</view>
 
           <!-- Commennt -->
-          <view class='img-text' style='margin-right:18rpx'
+          <view class='img-text' style='margin-right:38rpx'
                 catchtap='clickListComment' 
                 data-idx="{{index}}">
             <image src='{{theme}}/comment.png'></image>
           </view>
 
           <!-- Favor -->
-          <view class='img-text' catchtap='clickListFavor' data-idx="{{index}}">
+          <view class='img-text' catchtap='clickListFavor' data-idx="{{index}}" style='display: none;'>
             <image src="{{theme+(item.stats.favored>0?'/liked.png':'/like.png')}}"></image>
             <text style="{{item.stats.favored?'color:'+favorColor+';':''}}">{{item.stats.favors? item.stats.favors: "赞" }}</text>
           </view>

@@ -37,7 +37,8 @@ function fetch(options) {
       var resp_data = resp.data;
       console.log("get comment data:", resp_data.data)
       var resp_data = resp.data;
-      var comments = formatTimes(resp_data.data);
+      var comments = resp_data.data || [];
+      var comments = formatTimes(comments);
       view.setData({
         comments: comments
       })
@@ -83,9 +84,10 @@ function onPullDownRefresh(e) {
   }
   var pid = view.data.item.post.id
   api.getCommentList(pid).then(resp => {
-    var resp_data = resp.data;
+    var resp_data = resp.data
     wx.stopPullDownRefresh()
-    var comments = formatTimes(resp_data.data);
+    var comments = resp_data.data || []
+    var comments = formatTimes(comments)
     if (resp_data.data) {
       view.setData({ comments: comments})
     }
@@ -229,9 +231,9 @@ function onClikcFavorPost(e) {
 
 // 对帖子评论
 function onClickReplyPost(e) {
-  // if (replyHook()) {
-  //   return
-  // }
+  if (replyHook()) {
+    return
+  }
   view.setData({ reply: { focus: true } })
 }
 
@@ -299,7 +301,7 @@ function onClickListComment(e) {
 
 function onClickListCommentAction(e) {
   var idx = e.currentTarget.dataset.idx
-  console.log(e.currentTarget.dataset);
+  console.log(e.currentTarget.dataset, "click comment action......");
 
   var array = idx.split('-')
   var index = array[0], sub = array[1]
@@ -460,20 +462,24 @@ function replyToPost(replyText) {
 function replyToComment(idx, subIndex) {
   // commennt on comment
   var parent = view.data.comments[idx]
+  console.log(parent, "=====");
   var key = 'comments[' + idx + '].reply_list'
-
   // prepare ui state  TODO 这里需要和输入框双向绑定数据..
 
   if (!parent.reply_list) {
     parent.reply_list = []
   }
-
+  var uid = wx.getStorageSync('user_id')
   // send data 
   var data = {
-    post_id: view.data.item.post.id,
-    parent_id: parent.id,
+    post_id: parent.post_id,
+    replied_id: parent.id,
+    uid: uid
   }
 
+  if (subIndex >= 0){
+    data.to_uid = parent.reply_list[subIndex].uid
+  }
   // 评论的评论, 藏一个字符用来标识评论之评论
   // TODO
   // 为了简化后端逻辑，在此处隐藏一个不可见字符
@@ -481,21 +487,21 @@ function replyToComment(idx, subIndex) {
   var replier = undefined
   if (subIndex && parent.reply_list.length > subIndex) {
     var reply = parent.reply_list[subIndex]
-    data.reply_id = reply.author.id
     data.content = '\r' + view.data.reply.text
     replier = reply.author
   } else {
-    data.reply_id = parent.author.id
     data.content = view.data.reply.text
   }
 
   // send
   api.createComment(data).then(resp => {
+    var resp_data = resp.data
+    var new_reply =resp_data.data
     if (subIndex) {
-      resp.data.reply = true
-      resp.data.replier = replier
+      new_reply.reply = true
+      new_reply.replier = replier
     }
-    parent.reply_list.push(resp.data)
+    parent.reply_list.push(new_reply)
     view.setData({
       [key]: parent.reply_list
     })
@@ -505,7 +511,7 @@ function replyToComment(idx, subIndex) {
     wx.showToast({
       title: '已发送', icon: 'success'
     })
-    console.log("评论成功！！！", resp.data)
+    console.log("评论成功！！！", resp_data.data)
   }).catch(err => {
     wx.showToast({
       title: '发送失败', icon: 'none'
