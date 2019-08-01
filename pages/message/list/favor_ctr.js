@@ -7,7 +7,8 @@ function setup(_view) {
 }
 
 function replyHook() {
-  if (!(app.globalData.userInfo && app.globalData.userInfo.nickName)) {
+  var userInfo = wx.getStorageSync('user')
+  if (!userInfo) {
     wx.switchTab({
       url: '/pages/me/me',
     })
@@ -22,13 +23,11 @@ function replyHook() {
 }
 
 function onLoad(options) {
-  var user_id = wx.getStorageSync('user_id')
-  if(!user_id){
-    replyHook()
+  if(replyHook()){
     return
   }
-
-  api.getMessageList('favor', user_id, 0, 20).then(resp => {
+  var userInfo = wx.getStorageSync('user')
+  api.getMessageList('favor', userInfo.user_id, 0, 20).then(resp => {
     var resp_data = resp.data
     var unpacked = unpackMsgContent(resp_data.data)
     view.setData({ messages: unpacked })
@@ -42,12 +41,12 @@ function onPullDownRefresh() {
   if (view.data.loader.ing) {
     return
   }
-  var user_id = wx.getStorageSync('user_id')
-  if(!user_id){
-    replyHook()
+  if(replyHook()){
+    return
   }
+  var userInfo = wx.getStorageSync('user')
   view.setData({loader:{ing: true}})
-  api.getMessageList('favor', user_id, 0, 20).then(resp => {
+  api.getMessageList('favor', userInfo.user_id, 0, 20).then(resp => {
     var resp_data = resp.data
     wx.stopPullDownRefresh()
     var loader = { ing: false, more: true }
@@ -71,7 +70,7 @@ function onReachBottom() {
   if (view.data.loader.ing || !view.data.loader.more) {
     return
   }
-  var user_id = wx.getStorageSync('user_id')
+  var userInfo = wx.getStorageSync('user')
   var messages = view.data.messages
   var since = 0
   var limit = 20
@@ -79,7 +78,7 @@ function onReachBottom() {
     since = messages[messages.length - 1].id
   }
   view.setData({ loader: { ing: true } })
-  api.getMessageList('favor', user_id, since, limit).then(resp => {
+  api.getMessageList('favor', userInfo.user_id, since, limit).then(resp => {
     var resp_data = resp.data
     var loader = { ing: false, more: true }
     if (resp_data.data.length < limit) {

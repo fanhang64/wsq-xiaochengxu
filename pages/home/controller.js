@@ -72,9 +72,8 @@ function onLoad(opt) {
     }
   })
   
-  var user_id = wx.getStorageSync('user_id')
-
-  api.getPostFavorList(user_id).then( resp => {
+  var user = wx.getStorageSync('user')
+  api.getPostFavorList(user.user_id).then( resp => {
     console.log("get favor list ", resp)
     var res_data = resp.data
     wx.setStorage({ key: 'favor_post_id_list', data: res_data.data || [] })
@@ -82,21 +81,6 @@ function onLoad(opt) {
 
   // 进入第一次加载
   refreshList(view.data.tab.current)
-
-  // 用户信息
-  // try {
-  //   const value = wx.getStorageSync('user')
-  //   if (value) {
-  //     app.globalData.userInfo = value
-  //   }
-  // } catch (e) {
-  //   // Do something when catch error
-  // }
-  // api.getUser().then((resp) => {
-  //   app.globalData.userInfo = resp.data
-  //   // refresh local storage
-  //   wx.setStorage({ key: 'user', data: resp.data })
-  // })
 
   // 话题列表
   try {
@@ -143,7 +127,6 @@ function getTitle(item) {
 }
 
 function onClickNewPost(e) {
-  app.globalData.userInfo = {'nickname': '123'}
   if (app.globalData.userInfo && app.globalData.userInfo.nickname) {
     wx.navigateTo({
       url: '/pages/writer/writer',
@@ -168,7 +151,6 @@ function onTabChanged(idx) {
 
 function refreshList(tabIndex, topic_id) {
   var data = tabData[tabIndex]
-  console.log(data, "data,,=====");
   if (data.loader.ing) {
     return
   }
@@ -287,11 +269,11 @@ function onClickFavor(e) {
   var item = view.data.posts[idx]
   var key = 'posts[' + idx + '].stats'
 
-  var user_id = wx.getStorageSync('user_id')
+  var user = wx.getStorageSync('user')
   var favor_post_id_list = wx.getStorageSync('favor_post_id_list')
   if (item.stats.favored && item.stats.favored > 0) {
     console.log("delete favor")
-    api.deletePostFavor(item.id, user_id).then(resp => {
+    api.deletePostFavor(item.id, user.user_id).then(resp => {
       item.stats.favored = false
       item.stats.favors -= 1
       var index = favor_post_id_list.indexOf(item.id)
@@ -302,7 +284,7 @@ function onClickFavor(e) {
     })
   } else {
     console.log("create favor")
-    api.createPostFavor(item.id, user_id, item.user_id).then((resp) => {
+    api.createPostFavor(item.id, user.user_id, item.user_id).then((resp) => {
       item.stats.favors += 1
       item.stats.favored = true
       favor_post_id_list.push(item.id)
@@ -325,7 +307,7 @@ function onClickMenu(e) {
     }],
   }
   var user = app.globalData.userInfo
-  if (user && item.author && user.id == item.author.id) {
+  if (user && item.author && user.id == item.author.id && user.is_admin) {
     menu.items.push("删除")
     menu.actions.push(function () {
       deletePost(idx)
@@ -347,20 +329,17 @@ function onClickMenu(e) {
 }
 
 function report(post) {
-  var digest = {
-    text: post.content,
-    images: post.images,
-  }
-  var data = {
-    entity_id: post.id,
-    entity_ty: 0,
-    content: JSON.stringify(digest)
-  }
-
-  api.createReport(data).then( resp => {
-    wx.showToast({
-      title: '举报成功',
-    })
+  api.createReport(post.id).then( resp => {
+    var resp_data = resp.data;
+    if (resp_data.errcode == 0){
+      wx.showToast({
+        title: '举报成功',
+      })
+    }else{
+      wx.showToast({
+        title: '举报失败：未知错误', icon: 'none',
+      })
+    }
   }).catch( err => {
     wx.showToast({
       title: '举报失败：网络错误', icon: 'none',

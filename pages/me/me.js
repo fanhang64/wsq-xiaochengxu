@@ -59,4 +59,7 @@ Page({
       url: '/pages/me/bind',
     })
   },
+  clickExit: function(e){
+    ctr.exit(e)
+  }
 })

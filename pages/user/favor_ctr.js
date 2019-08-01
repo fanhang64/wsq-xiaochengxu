@@ -5,13 +5,33 @@ function setup(v) {
   view = v
 }
 
+function replyHook() {
+  var userInfo = wx.getStorageSync('user')
+  if (!userInfo) {
+    wx.switchTab({
+      url: '/pages/me/me',
+    })
+    setTimeout(function () {
+      wx.showToast({
+        title: '需要先绑定微信昵称', icon: 'none', duration: 2000
+      })
+    }, 500);
+    return true
+  }
+  return false
+}
+
 function onLoad(options) {
+  if (replyHook()){
+    return;
+  }
   if (options && options.uid) {
     view.data.user.uid = options.uid
   }else{
-    var uid = wx.getStorageSync('user_id')
-    view.data.user.uid = uid
+    var user = wx.getStorageSync('user')
+    view.data.user.uid = user.user_id
   }
+  
   var loader = view.data.loader
   loader.ing = true
   view.setData({loader: loader})

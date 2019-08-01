@@ -58,3 +58,19 @@
   align-items: center;
   box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2);
 } 
+
+.usertool {
+  height: 60rpx;
+  text-align: right;
+  position: absolute;
+  top: 30rpx;
+  right: 0;
+}
+
+.usertool-img {
+  width: 40rpx;
+  height: 40rpx;
+  margin-right: 32rpx;
+  opacity: 0.6;
+  margin-top:20rpx;
+}

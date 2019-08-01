@@ -3,22 +3,6 @@ const ctr = require('./controller.js')
 const util = require('../../utils/util.js')
 const kawa = require('../../kawa.js')
 
-// topics:[
-// {
-//   author: {
-//     name: '小虾米',
-//     avatar: '',
-//     ts: 1548571746979,
-//   },
-//   stats: {
-//     favored: 0,
-//     favors: 1,
-//     comment: 1
-//   },
-//   text: '小虾米 啦啦啦',
-//   styledText: ['123', '#hashtag#', 'abc']
-//   imgs: [],
-// },....]
 Page({
   data: {
     theme: kawa.Theme.Image,
@@ -26,8 +10,8 @@ Page({
     tabColor: kawa.Theme.TabSelectedColor || kawa.Theme.MainColor,
     favroColor: kawa.Theme.FavorColor || kawa.Theme.MainColor,
     speaker: {
-      title: "公告标题title",
-      link: "公告链接",
+      title: "欢迎来到多多微社区",
+      link: "",
     },
     tops: [],
     posts: [],
@@ -93,14 +77,13 @@ Page({
 
   // 点击公告
   clickSpeaker: function(e) {
-    var url = this.data.speaker.link
-    if (url) {
-      wx.navigateTo({
-        url: '/pages/webview/webview?q=' + encodeURI(url),
-      })
-    }
+    // var url = this.data.speaker.link
+    // if (url) {
+    //   wx.navigateTo({
+    //     url: '/pages/webview/webview?q=' + encodeURI(url),
+    //   })
+    // }
   },
-
   // 点击置顶帖
   clickTopList: function(e) {
     var idx = e.currentTarget.dataset.idx

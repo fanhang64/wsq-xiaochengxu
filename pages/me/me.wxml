@@ -2,30 +2,22 @@
 <view class='card' style='margin: 18rpx 0 18rpx 0;'>
   <view class='horizontal'>
     <image class='avatar' 
-      src="{{user.avatarUrl?user.avatarUrl: theme+'/user_icon.png'}}">
+      src="{{user.avatar?user.avatar: theme+'/user_icon.png'}}">
     </image>
     <view style='margin-left:18rpx;'>
       <view class='title' style='font-size:30rpx;' >{{user.nickName?user.nickName:'路人'}}</view>
-      <button wx:if="{{user.nickName && metadata.user_mode}}"
-        open-type="getPhoneNumber"
-        bindgetphonenumber="getPhoneNumber"
-        class='btn-clear subtitle'>{{user.phone? user.phone: '绑定手机号'}}</button>
     </view>
     <view hidden='{{user.nickName}}' style='margin-left:auto;'>
-      <button wx:if="{{metadata.user_mode < 2}}"
-      class='btn' 
+      <button class='btn' 
       hover-class='btn-hover'
       style='background-color: {{color}};'
       open-type="getUserInfo" 
       bindgetuserinfo="bindUserInfo"
       >绑定昵称</button>
-      <button wx:if="{{metadata.user_mode == 2}}"
-      class='btn' 
-      hover-class='btn-hover'
-      style='background-color: {{color}};'
-      bindtap='clickBindProfile'
-      >绑定资料</button>
     </view>
+    <view class="usertool" wx:if='{{user.nickName}}'>
+        <image class="usertool-img" src="../../images/exit_black.png" catchtap="clickExit"></image>
+      </view>
   </view>
 </view>
 
@@ -64,5 +56,5 @@
   <text
     style='color: #576b95; font-size: 30rpx;'
   >{{copyright}}</text>
-  <text wx:if="{{support}}">卡哇微社区(kawaapp.com) 提供技术支持</text>
+  <text wx:if="{{support}}">基于卡哇微社区小程序修改</text>
 </view>

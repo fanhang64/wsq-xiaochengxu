@@ -54,7 +54,9 @@ function addNewImage(images) {
 }
 
 function replyHook() {
-  if (!(app.globalData.userInfo && app.globalData.userInfo.nickname)) {
+  console.log(app.globalData.userInfo, "====writer...")
+  var userInfo = wx.getStorageSync('user')
+  if (!userInfo) {
     wx.switchTab({
       url: '/pages/me/me',
     })
@@ -79,13 +81,13 @@ function onClickSubmit() {
 
   // 文本内容
   var selected = view.data.topic.selected;
-  const user_id = wx.getStorageSync('user_id')
+  var userInfo = wx.getStorageSync('user')
 
   console.log(view.data.topic, "====topic ")
   var data = {
     title: view.data.title || "标题",
     content: view.data.content,
-    author_id: user_id,  // 用户id
+    author_id: userInfo.user_id,  // 用户id
   }
 
   // 地理位置
@@ -144,14 +146,6 @@ function onClickSubmit() {
     })
   })
 }
-
-// function linkTagPost(tag, pid) {
-//   api.linkTagPost({tags:[tag], pid: pid}).then( resp => {
-//     console.log("link success:" + resp.statusCode)
-//   }).catch( err => {
-//     console.log(err)
-//   })
-// }
 
 function uploadText(data) {
   return api.createPost(data)

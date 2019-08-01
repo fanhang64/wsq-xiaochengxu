@@ -1,4 +1,5 @@
 const api = require('../../utils/api.js')
+const app = getApp()
 
 var view = undefined
 function setup(_view) {
@@ -6,7 +7,8 @@ function setup(_view) {
 }
 
 function replyHook() {
-  if (!(app.globalData.userInfo && app.globalData.userInfo.nickName)) {
+  var userInfo = wx.getStorageSync('user')
+  if (!userInfo) {
     wx.switchTab({
       url: '/pages/me/me',
     })
@@ -21,13 +23,11 @@ function replyHook() {
 }
 
 function refreshMessage() {
-  var user_id = wx.getStorageSync('user_id')
-  if(!user_id){
-    replyHook()
+  if(replyHook()){
     return
   }
-
-  api.getMessageCount(user_id).then((resp) => {
+  var userInfo = wx.getStorageSync('user')
+  api.getMessageCount(userInfo.user_id).then((resp) => {
     console.log("message...", resp)
     var resp_data = resp.data
     view.setData({ count: resp_data.data })

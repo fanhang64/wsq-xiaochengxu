@@ -10,19 +10,27 @@ function setup(_view) {
 function onLoad(options) {
   view.data.shared = options.shared
   
-  // 非分享链接，直接打开
-  if (!options.shared) {
+  try{
     fetch(options)
-  } else {
-    // 如果是分享的链接，需要先登录 
-    api.autoAuth().then(() => {
-      fetch(options)
-    }).catch((err) => {
-      wx.showToast({
-        title: '帖子打开失败:' + err.code, icon: 'none', duration: 2000,
-      })
+  }catch(err){
+    wx.showToast({
+      title: '帖子打开失败:' + err.code, icon: 'none', duration: 2000,
     })
   }
+
+  // // 非分享链接，直接打开
+  // if (!options.shared) {
+  //   fetch(options)
+  // } else {
+  //   // 如果是分享的链接，需要先登录 
+  //   api.autoAuth().then(() => {
+  //     fetch(options)
+  //   }).catch((err) => {
+  //     wx.showToast({
+  //       title: '帖子打开失败:' + err.code, icon: 'none', duration: 2000,
+  //     })
+  //   })
+  // }
 }
 
 function fetch(options) {
@@ -133,7 +141,8 @@ function onReachBottom(e) {
 }
 
 function replyHook() {
-  if (!(app.globalData.userInfo && app.globalData.userInfo.nickName)) {
+  var user = wx.getStorageSync('user')
+  if (!user) {
     wx.switchTab({
       url: '/pages/me/me',
     })
@@ -193,10 +202,10 @@ function onClikcFavorPost(e) {
     view.setData({ item: { post: p } })
   }
   var p = view.data.item.post
-  var user_id = wx.getStorageSync('user_id')
+  var user = wx.getStorageSync('user')
   var favor_post_id_list = wx.getStorageSync('favor_post_id_list')
   if (p.stats && p.stats.favored) {
-    api.deletePostFavor(p.id, user_id).then(resp => {
+    api.deletePostFavor(p.id, user.user_id).then(resp => {
       p.stats.favored = 0
       if (p.stats.favors > 0) {
         p.stats.favors -= 1
@@ -213,7 +222,7 @@ function onClikcFavorPost(e) {
       console.log(err)
     })
   } else {
-    api.createPostFavor(p.id, user_id, p.user_id).then(resp => {
+    api.createPostFavor(p.id, user.user_id, p.user_id).then(resp => {
       p.stats.favored = 1
       p.stats.favors += 1
       favor_post_id_list.push(p.id)
@@ -236,8 +245,6 @@ function onClickReplyPost(e) {
   }
   view.setData({ reply: { focus: true } })
 }
-
-// --------- 对评论的动作 ---------
 
 // 对评论点赞、取消点赞
 function onClickListFavor(e) {
@@ -350,8 +357,8 @@ function onClickListCommentAction(e) {
     uid = view.data.comments[index].author.id
   }
 
-  var login_uid = wx.getStorageSync('user_id')
-  if (login_uid && login_uid == uid) {
+  var user = wx.getStorageSync('user')
+  if (user.user_id && user.user_id == uid) {
     menu.items.push("删除")
     menu.actions.push(actionDelete)
   }
@@ -420,10 +427,10 @@ function replyToPost(replyText) {
     console.log("data is empty!")
     return
   }
-  var uid = wx.getStorageSync('user_id')
+  var user = wx.getStorageSync('user')
   var post = view.data.item.post
   var data = {
-    uid: uid,
+    uid: user.user_id,
     content: replyText,
     post_id: post.id,
   }
@@ -469,12 +476,12 @@ function replyToComment(idx, subIndex) {
   if (!parent.reply_list) {
     parent.reply_list = []
   }
-  var uid = wx.getStorageSync('user_id')
+  var user = wx.getStorageSync('user')
   // send data 
   var data = {
     post_id: parent.post_id,
     replied_id: parent.id,
-    uid: uid
+    uid: user.user_id
   }
 
   if (subIndex >= 0){

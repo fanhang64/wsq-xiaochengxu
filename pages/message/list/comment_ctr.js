@@ -7,8 +7,8 @@ function setup(_view) {
 }
 
 function onLoad(opt) {
-  var user_id = wx.getStorageSync('user_id')
-  api.getMessageList('comment', user_id, 0, 20).then(resp => {
+  var user = wx.getStorageSync('user')
+  api.getMessageList('comment', user.user_id, 0, 20).then(resp => {
     var resp_data = resp.data
     var unpacked = unpackMsgContent(resp_data.data)
     view.setData({ messages: unpacked })
@@ -19,9 +19,9 @@ function onPullDownRefresh() {
   if (view.data.loader.ing) {
     return
   }
-  var user_id = wx.getStorageSync('user_id')
+  var user = wx.getStorageSync('user')
   view.setData({ loader: {ing: true} })
-  api.getMessageList('comment', user_id, 0, 20).then(resp => {
+  api.getMessageList('comment', user.user_id, 0, 20).then(resp => {
     var resp_data = resp.data
     wx.stopPullDownRefresh()
     var loader = {ing: false}
@@ -46,7 +46,7 @@ function onReachBottom() {
   if (view.data.loader.ing || !view.data.loader.more) {
     return
   }
-  var user_id = wx.getStorageSync('user_id')
+  var user = wx.getStorageSync('user')
   var messages = view.data.messages
   var since = 0
   var limit = 20
@@ -54,7 +54,7 @@ function onReachBottom() {
     since = messages[messages.length - 1].id
   }
   view.setData({ loader: { ing: true } })
-  api.getMessageList('comment', user_id, since, limit).then(resp => {
+  api.getMessageList('comment', user.user_id, since, limit).then(resp => {
     var resp_data = resp.data
     var loader = {ing: false}
     if (resp_data.data.length < limit) {

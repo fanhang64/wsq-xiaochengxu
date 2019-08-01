@@ -46,7 +46,19 @@ function req(options = {}) {
         if (r.statusCode == 200) {
           res(r);
         } else if (r.statusCode == 401) {
-          autoAuth()
+          console.log("去登陆")
+          wx.switchTab({
+            url: '/pages/me/me',
+          })
+          setTimeout(function () {
+            wx.showToast({
+              title: '需要先绑定微信昵称', icon: 'none', duration: 2000
+            })
+          }, 500);
+          rej({ 
+            code: r.statusCode, 
+            err: r.data
+          })
         } else {
           rej({ 
             code: r.statusCode, 
@@ -82,11 +94,11 @@ function autoAuth() {
   return new Promise((res, rej) => {
     // check localstorage first
     const value = wx.getStorageSync('token')
-    const user_id = wx.getStorageSync('user_id')
+    const user = wx.getStorageSync('user')
 
     if (value && !util.jwtExpire(value)) {
       g.token = value
-      g.user_id = user_id
+      g.user_id = user.user_id
       console.log("token not expire...")
       res(value)
       return
@@ -156,20 +168,58 @@ function autoAuth() {
   })
 }
 
-// Promised method: User/Post/Comment
+
 function auth() {
-  wx.login({
-    success: function(resp) {
-      if (resp.code) {
-        req({
-          url: `${Host}/api/auth`,
-          method: 'POST',
-          data: {
-            code: resp.code,
-          }
-        })
-      }
-    }
+  return new Promise((res, rej) => {
+    wx.login({
+      success: function(resp) {
+        if (resp.code) {
+          wx.getUserInfo({
+            success: r => {
+              req({
+                url: `${Host}/wx_login`,
+                method: 'POST',
+                data: {
+                  code: resp.code,
+                  userInfo: r.userInfo
+                }
+              }).then((resp) => {
+                console.log("auth....", resp)
+                var res_data = resp.data;
+                if (res_data.errcode == 0) {
+                  var token = res_data.data.token
+                  var userInfo = res_data.data.user_info
+                  //success, save token
+                  g.token = token
+                  console.log("get token", token)
+                  res(userInfo)
+                  wx.setStorage({
+                    key: 'token',
+                    data: g.token
+                  })
+                  wx.setStorage({
+                    key: 'user',
+                    data: userInfo
+                  })
+                } else {
+                  rej({ code: -1, err: 'fail:' + resp.statusCode})
+                }
+              }).catch((resp) => {
+                console.log(err)
+                rej({ code: -1, err: err })
+              })
+            }, fail: function(err) {
+              rej({ code: -1, err: err })
+            },
+          })
+        } else {
+          rej({ code: -1, err: 'wx.login return nil code' })
+        }
+      },
+      fail: function(err) {
+        rej({ code: -1, err: err })
+      },
+    })
   })
 }
 
@@ -441,11 +491,10 @@ function setAllMessageRead() {
 }
 
 // 举报接口
-function createReport(data) {
+function createReport(pid) {
   return req({
-    url: `${Host}/api/reports`,
-    method: 'POST',
-    data: data,
+    url: `${Host}/post/${pid}/report`,
+    method: 'POST'
   })
 }
 
@@ -460,6 +509,7 @@ function decrypt(data) {
 
 module.exports = {
   autoAuth: autoAuth,
+  auth: auth,
   updateUser: updateUser,
   getUser: getUser,
   getUserPostList: getUserPostList,
